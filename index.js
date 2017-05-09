@@ -1,4 +1,5 @@
 var Twit = require('twit');
+var Actions = require('./actions.js');
 
 var bot = new Twit({
     consumer_key: process.env.TWITTERBOT_CONSUMER_KEY,
@@ -8,12 +9,4 @@ var bot = new Twit({
     timeout_ms: 60*1000
 });
 
-bot.post('statuses/update', {status: 'hello world!'}
-    , function(err, data, response) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(data.text + ' was tweeted.');
-        }
-    }
-);
+Actions.getFollowerList(bot);
