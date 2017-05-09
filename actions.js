@@ -2,8 +2,9 @@
 var actions = module.exports = {};
 
 // Post a tweet containing the status's text
-actions.postNewTweet = function(bot) {
-    bot.post('statuses/update', {status: 'hello world!'}
+// text : String
+actions.postNewTweet = function(bot, text) {
+    bot.post('statuses/update', {status: text}
         , function(err, data, response) {
             if (err) {
                 console.log(err);
@@ -14,23 +15,25 @@ actions.postNewTweet = function(bot) {
     );
 }
 // Get list of screen_name's followers
-actions.getFollowerList = function(bot) {
-    bot.get('followers/list', {screen_name: 'itswill_liu'},
+// user : String
+actions.getFollowerList = function(bot, user) {
+    bot.get('followers/list', {screen_name: user},
         function(err, data, response) {
             if (err) {
                 console.log(err);
             } else {
                 data.users.forEach(function(user) {
                     console.log(user.name);
-                })
+                });
             }
         }
     );
 }
 
 // Follow screen_name user
-actions.followUser = function(bot) {
-    bot.post('friendships/create', {screen_name: 'ahandvanish'},
+// user : String
+actions.followUser = function(bot, user) {
+    bot.post('friendships/create', {screen_name: user},
         function(err, data, response) {
             if (err) {
                 console.log(err);
@@ -78,4 +81,95 @@ actions.sendDM = function(bot) {
             }
         }
     );
+}
+
+// Get tweets on timeline
+// count : int
+actions.getTimeline = function(bot, count) {
+    // default number of tweets to 5
+    var count = count || 5;
+
+    bot.get('statuses/home_timeline', {count: count},
+    function(err, data, response) {
+        if (err) {
+            console.log(err);
+        } else {
+            data.forEach(function(tweet) {
+                console.log(tweet.text);
+                console.log(tweet.user.name);
+                console.log(tweet.id_str);
+                console.log('\n');
+            });
+        }
+    });
+}
+
+// Retweet the passed in tweet ID;
+// id : String
+actions.retweetID = function(bot, id) {
+    // change 'retweet' to 'unretweet' to delete retweet
+    bot.post('statuses/retweet/:id', {id: id},
+        function(err, data, response) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(data.text + ' was retweeted.');
+            }
+        }
+    );
+}
+
+// Like the passed in tweet
+// id : String
+actions.likeTweet = function(bot, id) {
+    // to unlike, do 'favorites/destroy'
+    bot.post('favorites/create', {id: id},
+        function(err, data, response) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(data.text + ' was liked.');
+            }
+        }
+    );
+}
+
+
+// Get screen_name of tweet
+// id : String
+// Return : String
+var getScreenName = function(bot, id) {
+    bot.get('statuses/show/:id', {id: id},
+        function(err, data, response) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(data.user.screen_name);
+                return data.user.screen_name;
+            }
+        })
+}
+
+// Reply to tweet; gets user screen name first
+// reply : String
+// tweetID : String
+actions.replyTweet = function(bot, reply, tweetID) {
+    bot.get('statuses/show/:id', {id: tweetID}, function(err, data, response) {
+        // Get user screen_name
+        var user = data.user.screen_name;
+        // reply to tweet
+        bot.post('statuses/update', {status: '@' + user + ' ' + reply,
+            in_reply_to_status_id: tweetID},
+            function(err, data, response) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log('You replied to tweet '
+                    + data.in_reply_to_status_id_str + ' by user @'
+                    + data.in_reply_to_screen_name + ' with the message: '
+                    + data.text);
+                }
+            }
+        );
+    });
 }

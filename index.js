@@ -9,4 +9,7 @@ var bot = new Twit({
     timeout_ms: 60*1000
 });
 
-Actions.getFollowerList(bot);
+// Actions.getFollowerList(bot);
+// Actions.getTimeline(bot, 1);
+// var user = Actions.getScreenName(bot, '861772744484155392');
+Actions.replyTweet(bot, 'interesting2', '861772744484155392');
